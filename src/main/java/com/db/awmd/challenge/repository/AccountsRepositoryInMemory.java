@@ -162,7 +162,6 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	private BigDecimal getTotalBalance() {
 		bankLock.lock();
 
-		BigDecimal total = new BigDecimal(0);
 		try {
 
 			return totalBalance;
