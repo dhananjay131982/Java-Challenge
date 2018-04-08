@@ -30,6 +30,8 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 	private Lock bankLock = new ReentrantLock();
 
+	private BigDecimal totalBalance = new BigDecimal(0);
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -44,6 +46,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 		if (previousAccount != null) {
 			throw new DuplicateAccountIdException("Account id " + account.getAccountId() + " already exists!");
 		}
+		totalBalance = totalBalance.add(account.getBalance());
 	}
 
 	/*
@@ -100,16 +103,22 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 						+ accountTo.getAccountId());
 			}
 
-			BigDecimal beforeTotal = getTwoAccountBalance(accountFrom, accountTo);
+			BigDecimal beforeTotalOfTwoAccounts = getTwoAccountBalance(accountFrom, accountTo);
+			BigDecimal afterTotalOfTwoAccounts;
+
+			BigDecimal beforeTotal = getTotalBalance();
 			BigDecimal afterTotal;
 
 			if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == -1) {
 				accountFrom.withdraw(transferRequest.getAmount());
 				accountTo.deposit(transferRequest.getAmount());
-				afterTotal = getTwoAccountBalance(accountFrom, accountTo);
-				if (beforeTotal.compareTo(afterTotal) == 0) {
-					log.info("balance before Transfer " + beforeTotal);
-					log.info("balance after Transfer " + afterTotal);
+				afterTotalOfTwoAccounts = getTwoAccountBalance(accountFrom, accountTo);
+				afterTotal = getTotalBalance();
+				if (beforeTotalOfTwoAccounts.compareTo(afterTotalOfTwoAccounts) == 0) {
+					log.info("Two account balance before Transfer " + beforeTotalOfTwoAccounts
+							+ " Two account balance after Transfer " + afterTotalOfTwoAccounts);
+					log.info("Total balance before Transfer " + beforeTotal + " total balance after Transfer "
+							+ afterTotal);
 					emailNotificationService.notifyAboutTransfer(accountFrom, " withdraw sucess");
 					emailNotificationService.notifyAboutTransfer(accountTo, " deposit sucess");
 				}
@@ -137,6 +146,26 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 		try {
 
 			return accountFrom.getBalance().add(accountTo.getBalance());
+
+		} finally {
+			bankLock.unlock();
+		}
+	}
+
+	/**
+	 * This method returns total balance
+	 * 
+	 * @param accountFrom
+	 * @param accountTo
+	 * @return
+	 */
+	private BigDecimal getTotalBalance() {
+		bankLock.lock();
+
+		BigDecimal total = new BigDecimal(0);
+		try {
+
+			return totalBalance;
 
 		} finally {
 			bankLock.unlock();
