@@ -76,27 +76,33 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 		try {
 
-			BigDecimal beforeTotal = getTotalBalance();
+			Account accountFrom = getAccount(transferRequest.getAccountFrom());
 
-			if (getAccount(transferRequest.getAccountFrom()) == null) {
+			Account accountTo = getAccount(transferRequest.getAccountTo());
+			
+			if (accountFrom == null) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountFrom() + " not found");
 			}
-			if (getAccount(transferRequest.getAccountTo()) == null) {
+			if (accountTo == null) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountTo() + " not found");
 			}
-			if (transferRequest.getAmount()
-					.compareTo(getAccount(transferRequest.getAccountFrom()).getBalance()) == -1) {
-				getAccount(transferRequest.getAccountFrom()).withdraw(transferRequest.getAmount());
-				getAccount(transferRequest.getAccountTo()).deposit(transferRequest.getAmount());
+			
+			if (accountFrom.getAccountId().compareToIgnoreCase(accountTo.getAccountId())==0) {				
+				throw new ApplicationException("AccountFrom " + accountFrom.getAccountId() + " is same as accountTo " + accountTo.getAccountId());
+			}
+			
 
-				if (beforeTotal.compareTo(getTotalBalance()) == 0) {
-					emailNotificationService.notifyAboutTransfer(getAccount(transferRequest.getAccountFrom()),
-							" withdraw sucess");
-					emailNotificationService.notifyAboutTransfer(getAccount(transferRequest.getAccountTo()),
-							" deposit sucess");
+			BigDecimal beforeTotal = getTwoAccountBalance(accountFrom, accountTo);
+
+			if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == -1) {
+				accountFrom.withdraw(transferRequest.getAmount());
+				accountTo.deposit(transferRequest.getAmount());
+
+				if (beforeTotal.compareTo(getTwoAccountBalance(accountFrom, accountTo)) == 0) {
+					emailNotificationService.notifyAboutTransfer(accountFrom, " withdraw sucess");
+					emailNotificationService.notifyAboutTransfer(accountTo, " deposit sucess");
 				}
-			} else if (transferRequest.getAmount()
-					.compareTo(getAccount(transferRequest.getAccountFrom()).getBalance()) == 1) {
+			} else if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == 1) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountFrom()
 						+ " balance is less than " + transferRequest.getAmount());
 			}
@@ -107,22 +113,19 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	}
 
 	/**
-	 * @return
+	 * This method returns two account balance
 	 * 
-	 * 		This method returns total balance of accounts
+	 * @param accountFrom
+	 * @param accountTo
+	 * @return
 	 */
-	private BigDecimal getTotalBalance() {
+	private BigDecimal getTwoAccountBalance(Account accountFrom, Account accountTo) {
 		bankLock.lock();
 
 		try {
-			BigDecimal total = new BigDecimal(0);
 
-			for (Map.Entry<String, Account> entry : accounts.entrySet()) {
+			return accountFrom.getBalance().add(accountTo.getBalance());
 
-				total = total.add(((Account) entry.getValue()).getBalance());
-			}
-
-			return total;
 		} finally {
 			bankLock.unlock();
 		}
