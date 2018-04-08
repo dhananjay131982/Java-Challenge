@@ -93,6 +93,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 			}
 
 			BigDecimal beforeTotal = getTwoAccountBalance(accountFrom, accountTo);
+			
 
 			if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == -1) {
 				accountFrom.withdraw(transferRequest.getAmount());
@@ -101,6 +102,8 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 				if (beforeTotal.compareTo(getTwoAccountBalance(accountFrom, accountTo)) == 0) {
 					emailNotificationService.notifyAboutTransfer(accountFrom, " withdraw sucess");
 					emailNotificationService.notifyAboutTransfer(accountTo, " deposit sucess");
+				} else {
+					System.out.println("DJ");
 				}
 			} else if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == 1) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountFrom()
@@ -131,4 +134,5 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 		}
 	}
 
+	
 }
