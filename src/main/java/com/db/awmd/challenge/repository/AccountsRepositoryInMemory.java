@@ -14,10 +14,13 @@ import com.db.awmd.challenge.exception.ApplicationException;
 import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 import com.db.awmd.challenge.service.EmailNotificationService;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author Dhananjay Jadhav
  *
  */
+@Slf4j
 @Repository
 public class AccountsRepositoryInMemory implements AccountsRepository {
 
@@ -36,6 +39,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	 */
 	@Override
 	public void createAccount(Account account) throws DuplicateAccountIdException {
+		log.info("Creating account {}", account);
 		Account previousAccount = accounts.putIfAbsent(account.getAccountId(), account);
 		if (previousAccount != null) {
 			throw new DuplicateAccountIdException("Account id " + account.getAccountId() + " already exists!");
@@ -53,11 +57,13 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	 */
 	@Override
 	public Account getAccount(String accountId) {
+		log.info("getAccount ", accountId);
 		return accounts.get(accountId);
 	}
 
 	@Override
 	public void clearAccounts() {
+		log.info("clearAccounts ");
 		accounts.clear();
 	}
 
@@ -71,6 +77,8 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	 * This method is used to transfer money from one account to another
 	 */
 	public void transferMoney(TransferRequest transferRequest) throws ApplicationException {
+
+		log.info("Start of transferMoney ", transferRequest);
 
 		bankLock.lock();
 
@@ -93,17 +101,17 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 			}
 
 			BigDecimal beforeTotal = getTwoAccountBalance(accountFrom, accountTo);
-			
+			BigDecimal afterTotal;
 
 			if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == -1) {
 				accountFrom.withdraw(transferRequest.getAmount());
 				accountTo.deposit(transferRequest.getAmount());
-
-				if (beforeTotal.compareTo(getTwoAccountBalance(accountFrom, accountTo)) == 0) {
+				afterTotal = getTwoAccountBalance(accountFrom, accountTo);
+				if (beforeTotal.compareTo(afterTotal) == 0) {
+					log.info("balance before Transfer " + beforeTotal);
+					log.info("balance after Transfer " + afterTotal);
 					emailNotificationService.notifyAboutTransfer(accountFrom, " withdraw sucess");
 					emailNotificationService.notifyAboutTransfer(accountTo, " deposit sucess");
-				} else {
-					System.out.println("DJ");
 				}
 			} else if (transferRequest.getAmount().compareTo(accountFrom.getBalance()) == 1) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountFrom()
@@ -113,6 +121,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 		} finally {
 			bankLock.unlock();
 		}
+		log.info("End of transferMoney ");
 	}
 
 	/**
@@ -134,5 +143,4 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 		}
 	}
 
-	
 }
