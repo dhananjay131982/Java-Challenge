@@ -144,12 +144,12 @@ public class AccountsServiceTest {
 	}
 
 	@Test
-	public void addAccounts() throws Exception {
+	public void transferMoneys() throws Exception {
 		Account account;
 
 		int min = 1;
 
-		int max = 100000;
+		int max = 10000;
 
 		TransferRequest transferRequest;
 		Random random = new Random();
