@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
+import java.util.Random;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,11 +57,11 @@ public class AccountsServiceTest {
 
 	@Test
 	public void transferMoney() throws Exception {
-		Account fromAccount = new Account("1");
+		Account fromAccount = new Account("Id1");
 		fromAccount.setBalance(new BigDecimal(1000));
 		this.accountsService.createAccount(fromAccount);
 
-		Account toAccount = new Account("2");
+		Account toAccount = new Account("Id2");
 		toAccount.setBalance(new BigDecimal(1000));
 		this.accountsService.createAccount(toAccount);
 
@@ -78,11 +79,11 @@ public class AccountsServiceTest {
 
 	@Test
 	public void transferMoneyAmountNegative() throws Exception {
-		Account fromAccount = new Account("3");
+		Account fromAccount = new Account("Id3");
 		fromAccount.setBalance(new BigDecimal(1000));
 		this.accountsService.createAccount(fromAccount);
 
-		Account toAccount = new Account("4");
+		Account toAccount = new Account("Id4");
 		toAccount.setBalance(new BigDecimal(1000));
 		this.accountsService.createAccount(toAccount);
 
@@ -103,7 +104,7 @@ public class AccountsServiceTest {
 	@Test
 	public void transferMoneyNoFromAccount() throws Exception {
 
-		Account toAccount = new Account("5");
+		Account toAccount = new Account("Id5");
 		toAccount.setBalance(new BigDecimal(1000));
 		this.accountsService.createAccount(toAccount);
 
@@ -124,7 +125,7 @@ public class AccountsServiceTest {
 	@Test
 	public void transferMoneyNoToAccount() throws Exception {
 
-		Account fromAccount = new Account("6");
+		Account fromAccount = new Account("Id6");
 		fromAccount.setBalance(new BigDecimal(1000));
 		this.accountsService.createAccount(fromAccount);
 
@@ -142,4 +143,43 @@ public class AccountsServiceTest {
 		}
 	}
 
+	@Test
+	public void addAccounts() throws Exception {
+		Account account;
+
+		int min = 1;
+
+		int max = 100000;
+
+		TransferRequest transferRequest;
+		Random random = new Random();
+		String fromAccount;
+
+		String toAccount;
+
+		for (int i = min; i <= max; i++) {
+			account = new Account(i + "");
+			account.setBalance(new BigDecimal(1000));
+			this.accountsService.createAccount(account);
+		}
+		
+		for (int i = min; i < max; i++) {
+			transferRequest = new TransferRequest();
+			fromAccount = random.nextInt((max - min) + 1) + min + "";
+			toAccount = random.nextInt((max - min) + 1) + min + "";
+			if (fromAccount.compareTo(toAccount) == 0) {
+				toAccount = random.nextInt((max - min) + 1) + min + "";
+			}
+
+			transferRequest.setAccountFrom(fromAccount);
+
+			transferRequest.setAccountTo(toAccount);
+
+			transferRequest.setAmount(new BigDecimal(10));
+
+			this.accountsService.transferMoney(transferRequest);
+
+		}
+
+	}
 }
