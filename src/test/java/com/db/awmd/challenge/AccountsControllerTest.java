@@ -120,7 +120,7 @@ public class AccountsControllerTest {
 				.content("{\"accountId\":\"2\",\"balance\":1000}")).andExpect(status().isCreated());
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content(
 						"{\n" + "  \"accountFrom\": 2,\n" + "  \"accountTo\" : 1,\n" + "  \"amount\" : 20\n" + "}"))
 				.andExpect(status().isOk());
 
@@ -133,7 +133,7 @@ public class AccountsControllerTest {
 				.content("{\"accountId\":\"1\",\"balance\":1000}")).andExpect(status().isCreated());
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content(
 						"{\n" + "  \"accountFrom\": 2,\n" + "  \"accountTo\" : 1,\n" + "  \"amount\" : 20\n" + "}"))
 				.andExpect(status().isBadRequest());
 
@@ -146,7 +146,7 @@ public class AccountsControllerTest {
 				.content("{\"accountId\":\"2\",\"balance\":1000}")).andExpect(status().isCreated());
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content(
 						"{\n" + "  \"accountFrom\": 2,\n" + "  \"accountTo\" : 1,\n" + "  \"amount\" : 20\n" + "}"))
 				.andExpect(status().isBadRequest());
 
@@ -156,7 +156,7 @@ public class AccountsControllerTest {
 	public void transferMoneyAccountsNotExist() throws Exception {
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content(
 						"{\n" + "  \"accountFrom\": 2,\n" + "  \"accountTo\" : 1,\n" + "  \"amount\" : 20\n" + "}"))
 				.andExpect(status().isBadRequest());
 
@@ -166,7 +166,7 @@ public class AccountsControllerTest {
 	public void transferMoneyAmountBadFormat() throws Exception {
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content(
 						"{\n" + "  \"accountFrom\": 2,\n" + "  \"accountTo\" : 1,\n" + "  \"amount\" : amount\n" + "}"))
 				.andExpect(status().isBadRequest());
 
@@ -176,7 +176,7 @@ public class AccountsControllerTest {
 	public void transferMoneyNoToAccount() throws Exception {
 
 		this.mockMvc.perform(
-				put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content("{\n" + "  \"accountFrom\": 2,\n" +
+				put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content("{\n" + "  \"accountFrom\": 2,\n" +
 
 						"  \"amount\" : 10\n" + "}"))
 				.andExpect(status().isBadRequest());
@@ -187,7 +187,7 @@ public class AccountsControllerTest {
 	public void transferMoneyNoFromAccount() throws Exception {
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON)
 						.content("{\n" + "  \"accountTo\": 2,\n" + "  \"amount\" : 10\n" + "}"))
 				.andExpect(status().isBadRequest());
 
@@ -197,7 +197,7 @@ public class AccountsControllerTest {
 	public void transferMoneyAmountNegative() throws Exception {
 
 		this.mockMvc
-				.perform(put("/v1/accounts").contentType(MediaType.APPLICATION_JSON).content(
+				.perform(put("/v1/accounts/transfer").contentType(MediaType.APPLICATION_JSON).content(
 						"{\n" + "  \"accountTo\": 2,\n" + "  \"accountTo\" : 1,\n" + "  \"amount\" : -10\n" + "}"))
 				.andExpect(status().isBadRequest());
 
