@@ -70,7 +70,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	 * 
 	 * This method is used to transfer money from one account to another
 	 */
-	public void transferMoney(TransferRequest transferRequest) {
+	public void transferMoney(TransferRequest transferRequest) throws ApplicationException {
 
 		bankLock.lock();
 
@@ -79,18 +79,18 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 			Account accountFrom = getAccount(transferRequest.getAccountFrom());
 
 			Account accountTo = getAccount(transferRequest.getAccountTo());
-			
+
 			if (accountFrom == null) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountFrom() + " not found");
 			}
 			if (accountTo == null) {
 				throw new ApplicationException("Account id " + transferRequest.getAccountTo() + " not found");
 			}
-			
-			if (accountFrom.getAccountId().compareToIgnoreCase(accountTo.getAccountId())==0) {				
-				throw new ApplicationException("AccountFrom " + accountFrom.getAccountId() + " is same as accountTo " + accountTo.getAccountId());
+
+			if (accountFrom.getAccountId().compareToIgnoreCase(accountTo.getAccountId()) == 0) {
+				throw new ApplicationException("AccountFrom " + accountFrom.getAccountId() + " is same as accountTo "
+						+ accountTo.getAccountId());
 			}
-			
 
 			BigDecimal beforeTotal = getTwoAccountBalance(accountFrom, accountTo);
 

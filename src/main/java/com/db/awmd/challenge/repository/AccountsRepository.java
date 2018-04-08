@@ -2,6 +2,7 @@ package com.db.awmd.challenge.repository;
 
 import com.db.awmd.challenge.domain.Account;
 import com.db.awmd.challenge.domain.TransferRequest;
+import com.db.awmd.challenge.exception.ApplicationException;
 import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 
 /**
@@ -18,5 +19,5 @@ public interface AccountsRepository {
 
   void clearAccounts();
   
-  void transferMoney(TransferRequest transferRequest);
+  void transferMoney(TransferRequest transferRequest) throws ApplicationException;
 }
